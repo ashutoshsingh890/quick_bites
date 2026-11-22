@@ -1,0 +1,69 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>Quick Bites Cafe</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+:root{--bg:#fff8ec;--card:#fff;--tx:#1d1a16;--mu:#7a6f62;--ac:#e8a317;--bd:#eadfcb}
+@media(prefers-color-scheme:dark){:root{--bg:#171410;--card:#221e18;--tx:#f5ecdc;--mu:#a99d8c;--bd:#3a3328}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font:16px system-ui,sans-serif;max-width:640px;margin:auto;padding:12px}
+h1{margin:4px 0;font-size:22px}h2{font-size:15px;color:var(--ac);margin:18px 0 6px;text-transform:uppercase}
+.row{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 10px;background:var(--card);border:1px solid var(--bd);border-radius:10px;margin:5px 0}
+.mu{color:var(--mu);font-size:13px}button{font:inherit;border:0;border-radius:8px;padding:8px 12px;background:var(--ac);color:#1d1a16;font-weight:600;cursor:pointer}
+button.s{background:var(--bd);color:var(--tx)}button:disabled{opacity:.5}.q{display:flex;align-items:center;gap:8px}.q button{padding:2px 10px}
+input,textarea{font:inherit;width:100%;padding:10px;border:1px solid var(--bd);border-radius:8px;background:var(--card);color:var(--tx);margin:4px 0}
+.bar{position:sticky;bottom:0;background:var(--bg);padding:8px 0}.tag{padding:2px 8px;border-radius:99px;font-size:12px;background:var(--bd)}
+.qr{display:inline-block;text-align:center;margin:8px;padding:8px;background:#fff;color:#000;border-radius:8px}.star{font-size:28px;background:none;padding:0 2px}
+a{text-decoration:none}@media print{.np{display:none}}
+</style></head><body><div id="app"></div>
+<script>
+const $=s=>document.querySelector(s),app=$("#app"),rs=n=>"₹"+n;
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const ST={new:"Waiting for waiter",accepted:"Accepted – preparing",served:"Served",paid:"Paid"};
+let C,cart={},timer,pin=localStorage.getItem("pin")||"",lastNew=-1,rt=0,tab="all";
+const api=(u,m="GET",b)=>fetch("/api/"+u,{method:m,headers:{"Content-Type":"application/json","x-pin":pin},body:b?JSON.stringify(b):undefined}).then(async r=>{const j=await r.json();if(!r.ok)throw new Error(j.error||"Error");return j});
+const billText=o=>`*${C.cafeName}*\nHi ${o.name}, Table ${o.table}\n`+o.items.map(i=>`${i.n} x${i.q} = ${rs(i.p*i.q)}`).join("\n")+`\n*Total: ${rs(o.total)}*\nThank you, visit again!`;
+function stop(){clearInterval(timer)}
+async function route(){stop();if(!C)C=await api("config");const h=location.hash.slice(1);
+ if(h==="waiter")waiter();else if(h==="tables")tables();else if(/^t\d+$/.test(h))customer(h.slice(1));else app.innerHTML=`<h1>${C.cafeName}</h1><p class="mu">Please scan the QR code on your table.</p><p class="mu"><a href="#waiter">Staff</a></p>`}
+function customer(t){const id=localStorage.getItem("oid");if(id){track(id,t)}else menu(t)}
+function menu(t){const keep={nm:$("#nm")?.value,ph:$("#ph")?.value},y=scrollY;let h=`<h1>${C.cafeName} · Table ${t}</h1>`;
+ for(const c in C.menu){h+=`<h2>${c}</h2>`;C.menu[c].forEach(([n,p],i)=>{h+=`<div class="row"><div>${esc(n)}<div class="mu">${rs(p)}</div></div><div class="q"><button class="s" data-n="${esc(n)}" data-d="-1">−</button><b>${cart[n]||0}</b><button data-n="${esc(n)}" data-d="1">+</button></div></div>`})}
+ const price={};for(const c in C.menu)C.menu[c].forEach(([n,p])=>price[n]=p);
+ const cnt=Object.values(cart).reduce((a,b)=>a+b,0),tot=Object.entries(cart).reduce((a,[n,q])=>a+price[n]*q,0);
+ h+=`<h2>Your details</h2><input id="nm" placeholder="Your name" value="${esc(keep.nm??localStorage.getItem("nm")??"")}"><input id="ph" inputmode="numeric" placeholder="WhatsApp number (10 digits)" value="${esc(keep.ph??localStorage.getItem("ph")??"")}"><div class="bar"><button id="go" style="width:100%" ${cnt?"":"disabled"}>Place order · ${cnt} items · ${rs(tot)}</button></div>`;
+ app.innerHTML=h;scrollTo(0,y);
+ app.querySelectorAll("button[data-n]").forEach(b=>b.onclick=()=>{const n=b.dataset.n,q=Math.max(0,(cart[n]||0)+ +b.dataset.d);q?cart[n]=q:delete cart[n];menu(t)});
+ $("#go").onclick=async()=>{const name=$("#nm").value.trim(),phone=$("#ph").value.replace(/\D/g,"").slice(-10);
+  if(!name||phone.length!==10)return alert("Please enter your name and a 10-digit number");
+  try{$("#go").disabled=true;const o=await api("orders","POST",{table:t,name,phone,items:Object.entries(cart).map(([n,q])=>({n,q}))});
+   localStorage.setItem("nm",name);localStorage.setItem("ph",phone);localStorage.setItem("oid",o.id);cart={};track(o.id,t)}catch(e){alert(e.message);$("#go").disabled=false}}}
+function track(id,t){const load=async()=>{try{const o=await api("orders/"+id);if(document.activeElement?.id==="fb")return;view(o,t)}catch(e){localStorage.removeItem("oid");stop();menu(t)}};load();timer=setInterval(load,3000)}
+function view(o,t){let h=`<h1>Table ${o.table} · ${esc(o.name)}</h1><p><span class="tag">${ST[o.status]}</span></p>`;
+ o.items.forEach(i=>h+=`<div class="row"><span>${esc(i.n)} × ${i.q}</span><b>${rs(i.p*i.q)}</b></div>`);
+ h+=`<div class="row"><b>Total bill</b><b>${rs(o.total)}</b></div>`;
+ if(o.status!=="paid"){const u=`upi://pay?pa=${C.upiId}&pn=${encodeURIComponent(C.cafeName)}&am=${o.total}&cu=INR&tn=Table%20${o.table}`;
+  h+=`<p><a href="${u}"><button style="width:100%">Pay ${rs(o.total)} via UPI</button></a></p><div id="uq" style="text-align:center"></div><p class="mu">You can also pay cash at the counter.</p>`;
+  setTimeout(()=>{const e=$("#uq");if(e&&!e.firstChild)try{new QRCode(e,{text:u,width:140,height:140})}catch(x){}},0)}
+ if(!o.fb)h+=`<h2>Feedback</h2><div>${[1,2,3,4,5].map(n=>`<button class="star" data-r="${n}">${n<=rt?"★":"☆"}</button>`).join("")}</div><textarea id="fb" placeholder="How was everything?"></textarea><button id="sf">Submit feedback</button>`;
+ else h+=`<p>Thank you for your feedback ${"★".repeat(o.fb.r)}</p>`;
+ h+=`<p><button class="s" id="more">Order more</button></p>`;app.innerHTML=h;
+ app.querySelectorAll(".star").forEach(b=>b.onclick=()=>{rt=+b.dataset.r;app.querySelectorAll(".star").forEach((x,i)=>x.textContent=i<rt?"★":"☆")});
+ $("#sf")&&($("#sf").onclick=async()=>{if(!rt)return alert("Select stars first");await api(`orders/${o.id}/feedback`,"POST",{r:rt,t:$("#fb").value})});
+ $("#more").onclick=()=>{localStorage.removeItem("oid");stop();rt=0;menu(t)}}
+function beep(){try{const a=new AudioContext(),o=a.createOscillator();o.connect(a.destination);o.frequency.value=880;o.start();setTimeout(()=>o.stop(),300)}catch(e){}}
+function waiter(){if(!pin)return login();
+ const load=async()=>{try{const L=await api("orders");const nw=L.filter(o=>o.status==="new").length;if(lastNew>=0&&nw>lastNew)beep();lastNew=nw;
+  const list=tab==="all"?L:L.filter(o=>o.status===tab);
+  let h=`<h1>Orders <span class="mu">(${nw} new)</span></h1><div class="np" style="display:flex;gap:6px;flex-wrap:wrap">${["all","new","accepted","served","paid"].map(s=>`<button class="${tab===s?"":"s"}" data-t="${s}">${s}</button>`).join("")}<button class="s" onclick="location.hash='tables'">Table QRs</button></div>`;
+  list.forEach(o=>{const wa=`https://wa.me/${C.countryCode}${o.phone}?text=${encodeURIComponent(billText(o))}`,nx={new:["accepted","Accept"],accepted:["served","Served"],served:["paid","Mark paid"]}[o.status];
+   h+=`<div class="row" style="display:block"><div style="display:flex;justify-content:space-between"><b>Table ${o.table} · ${esc(o.name)}</b><span class="tag">${ST[o.status]}</span></div><div class="mu">${o.phone} · ${new Date(o.ts).toLocaleTimeString()}</div><div>${o.items.map(i=>esc(i.n)+" ×"+i.q).join(", ")}</div><b>${rs(o.total)}</b>${o.fb?`<div class="mu">★${o.fb.r} ${esc(o.fb.t||"")}</div>`:""}
+   <div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap">${nx?`<button data-id="${o.id}" data-s="${nx[0]}">${nx[1]}</button>`:""}<a href="${wa}" target="_blank"><button class="s">Send bill on WhatsApp</button></a></div></div>`});
+  if(!list.length)h+="<p class='mu'>No orders.</p>";app.innerHTML=h;
+  app.querySelectorAll("[data-t]").forEach(b=>b.onclick=()=>{tab=b.dataset.t;load()});
+  app.querySelectorAll("[data-s]").forEach(b=>b.onclick=async()=>{await api(`orders/${b.dataset.id}/status`,"POST",{status:b.dataset.s});load()})}catch(e){pin="";localStorage.removeItem("pin");stop();login()}};
+ load();timer=setInterval(load,3000)}
+function login(){app.innerHTML=`<h1>Staff login</h1><input id="pn" type="password" placeholder="Staff PIN"><button id="lg">Login</button>`;
+ $("#lg").onclick=async()=>{pin=$("#pn").value;try{await api("orders");localStorage.setItem("pin",pin);waiter()}catch(e){pin="";alert("Wrong PIN")}}}
+function tables(){stop();app.innerHTML=`<h1>Table QR codes</h1><p class="np"><button class="s" onclick="location.hash='waiter'">Back</button> <button onclick="print()">Print</button></p><div id="qs"></div>`;
+ for(let i=1;i<=C.tables;i++){const d=document.createElement("div");d.className="qr";d.innerHTML=`<div id="q${i}"></div><b>${C.cafeName}<br>Table ${i}</b>`;$("#qs").appendChild(d);try{new QRCode($("#q"+i),{text:location.origin+"/#t"+i,width:130,height:130})}catch(e){}}}
+addEventListener("hashchange",route);route();
+</script></body></html>
