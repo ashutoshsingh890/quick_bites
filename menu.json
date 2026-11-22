@@ -1,0 +1,238 @@
+{
+ "Pizza": [
+  [
+   "Margherita",
+   99
+  ],
+  [
+   "Corn Exotica",
+   105
+  ],
+  [
+   "Farmhouse",
+   95
+  ],
+  [
+   "Peri Peri Paneer",
+   110
+  ]
+ ],
+ "Burgers": [
+  [
+   "Veg Cheese Burger",
+   70
+  ],
+  [
+   "Peri Peri Burger",
+   75
+  ],
+  [
+   "Aloo Tikki Burger",
+   75
+  ]
+ ],
+ "Sandwiches": [
+  [
+   "Cheese Corn",
+   75
+  ],
+  [
+   "Paneer Keema",
+   80
+  ],
+  [
+   "Tomato Cucumber Cheese",
+   70
+  ],
+  [
+   "Veg Club Sandwich",
+   90
+  ]
+ ],
+ "Munchies": [
+  [
+   "Cheese Garlic Bread",
+   65
+  ],
+  [
+   "Chilli Cheese Toast",
+   60
+  ],
+  [
+   "Vegetable Maggi",
+   55
+  ],
+  [
+   "Tadka Maggi",
+   60
+  ],
+  [
+   "Chilli Oil Cheese Maggi",
+   65
+  ],
+  [
+   "Peri Peri Fries",
+   85
+  ],
+  [
+   "Salted Fries",
+   80
+  ],
+  [
+   "Korean Cream Cheese Bun",
+   80
+  ],
+  [
+   "Potato Wedges",
+   85
+  ]
+ ],
+ "Mocktails": [
+  [
+   "Fresh Lime Soda",
+   60
+  ],
+  [
+   "Mint Lime Soda",
+   70
+  ],
+  [
+   "Masala Soda",
+   75
+  ],
+  [
+   "Virgin Mojito",
+   75
+  ],
+  [
+   "Watermelon Mojito",
+   75
+  ],
+  [
+   "Orange Mojito",
+   75
+  ],
+  [
+   "Pineapple Mojito",
+   75
+  ],
+  [
+   "Blue Lagoon",
+   80
+  ],
+  [
+   "Wildcat Cooler",
+   80
+  ],
+  [
+   "Peddle On The Beach",
+   85
+  ]
+ ],
+ "Coffee & Cold Drinks": [
+  [
+   "Americano",
+   40
+  ],
+  [
+   "Hazelnut Cappuccino",
+   55
+  ],
+  [
+   "Caramel Cappuccino",
+   55
+  ],
+  [
+   "Cold Coffee",
+   70
+  ],
+  [
+   "Iced Latte",
+   70
+  ],
+  [
+   "Iced Mocha",
+   50
+  ]
+ ],
+ "Shakes": [
+  [
+   "Oreo Shake",
+   80
+  ],
+  [
+   "KitKat Shake",
+   80
+  ],
+  [
+   "Mango Vanilla Shake",
+   80
+  ],
+  [
+   "Strawberry Shake",
+   80
+  ]
+ ],
+ "Pasta": [
+  [
+   "White Sauce Pasta",
+   110
+  ],
+  [
+   "Pink Sauce Pasta",
+   110
+  ],
+  [
+   "Red Sauce Pasta",
+   110
+  ]
+ ],
+ "Tea": [
+  [
+   "Ginger Tea",
+   25
+  ],
+  [
+   "Elaichi Tea",
+   25
+  ],
+  [
+   "Lemon Tea",
+   25
+  ],
+  [
+   "Lemon Masala Tea",
+   25
+  ],
+  [
+   "Ginger Lemon Tea",
+   30
+  ],
+  [
+   "Peach Iced Tea",
+   70
+  ],
+  [
+   "Mango Berry Iced Tea",
+   75
+  ]
+ ],
+ "Coffee": [
+  [
+   "Cappuccino",
+   40
+  ],
+  [
+   "Latte",
+   40
+  ],
+  [
+   "Mocha",
+   50
+  ],
+  [
+   "Hot Chocolate",
+   65
+  ]
+ ]
+}
